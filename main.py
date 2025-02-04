@@ -1,8 +1,21 @@
+import psycopg2
+import os
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from time import sleep
+
+load_dotenv()
+
+# Postgres config
+DB_CONFIG = {
+    "dbname": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "host": os.getenv("DB_HOST"),
+    "port": os.getenv("DB_PORT")
+}
 
 # Setup chrom web driver
 PATH = "./chromedriver"
@@ -11,7 +24,7 @@ service = Service(PATH)
 chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
-base_url = "https://www.isna.ir"
+base_url = "https://quera.org/"
 
 collected_links = set()
 
@@ -30,6 +43,7 @@ def get_links(url):
 
 # Get all links of first depth
 collected_links.update(get_links(base_url))
+print(f"Depth 1: {len(collected_links)} links collected")
 depth_1_links = list(collected_links)
 
 # Get links of second depth
@@ -38,3 +52,5 @@ for link in depth_1_links:
         break
     new_links = get_links(link)
     collected_links.update(new_links)
+    print(f"Depth 2: {len(collected_links)} total links collected")
+
