@@ -39,7 +39,7 @@ service = Service(PATH)
 chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
-base_url = "https://quera.org/"
+base_url = "https://example.com"
 collected_links = set()
 
 # A function to get links of page
