@@ -17,6 +17,21 @@ DB_CONFIG = {
     "port": os.getenv("DB_PORT")
 }
 
+# A function to save links into database
+def save_links_to_db(links):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        cur.executemany(
+            "INSERT INTO links (url) VALUES (%s) ON CONFLICT (url) DO NOTHING;",
+            [(link,) for link in links],
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error saving links: {e}")
+
 # Setup chrom web driver
 PATH = "./chromedriver"
 chrom_options = Options()
@@ -25,26 +40,23 @@ chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
 base_url = "https://quera.org/"
-
 collected_links = set()
 
 # A function to get links of page
 def get_links(url):
     links = set()
     driver.get(url)
-
     elements = driver.find_elements(By.TAG_NAME, "a")
     for elem in elements:
         link = elem.get_attribute("href")
         if link:
             links.add(link)
-    
     return links
 
 # Get all links of first depth
-collected_links.update(get_links(base_url))
-print(f"Depth 1: {len(collected_links)} links collected")
-depth_1_links = list(collected_links)
+depth_1_links = get_links(base_url)
+collected_links.update(depth_1_links)
+save_links_to_db(depth_1_links)
 
 # Get links of second depth
 for link in depth_1_links:
@@ -52,5 +64,8 @@ for link in depth_1_links:
         break
     new_links = get_links(link)
     collected_links.update(new_links)
-    print(f"Depth 2: {len(collected_links)} total links collected")
+    save_links_to_db(new_links)
 
+print(f"Total links collected: {len(collected_links)}")
+
+driver.quit()
