@@ -27,3 +27,9 @@ def get_links(url):
             links.add(link)
     
     return links
+
+# Get all links of first depth
+collected_links.update(get_links(base_url))
+depth_1_links = list(collected_links)
+
+for link in depth_1_links:
