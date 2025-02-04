@@ -32,4 +32,9 @@ def get_links(url):
 collected_links.update(get_links(base_url))
 depth_1_links = list(collected_links)
 
+# Get links of second depth
 for link in depth_1_links:
+    if len(collected_links) >= 120:
+        break
+    new_links = get_links(link)
+    collected_links.update(new_links)
