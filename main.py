@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -39,7 +40,7 @@ service = Service(PATH)
 chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
-base_url = "https://quera.org/"
+base_url = "https://www.isna.ir/"
 collected_links = set()
 
 # A function to get links of page
@@ -49,7 +50,7 @@ def get_links(url):
     elements = driver.find_elements(By.TAG_NAME, "a")
     for elem in elements:
         link = elem.get_attribute("href")
-        if link:
+        if link and urlparse(link).netloc.endswith("isna.ir"):
             links.add(link)
     return links
 
