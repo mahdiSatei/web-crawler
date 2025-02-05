@@ -39,7 +39,7 @@ service = Service(PATH)
 chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
-base_url = "https://example.com"
+base_url = "https://quera.org/"
 collected_links = set()
 
 # A function to get links of page
@@ -54,17 +54,18 @@ def get_links(url):
     return links
 
 # Get all links of first depth
-depth_1_links = get_links(base_url)
+depth_1_links = list(get_links(base_url))[:120]
 collected_links.update(depth_1_links)
 save_links_to_db(depth_1_links)
 
 # Get links of second depth
-for link in depth_1_links:
-    if len(collected_links) >= 120:
-        break
-    new_links = get_links(link)
-    collected_links.update(new_links)
-    save_links_to_db(new_links)
+if len(collected_links) < 120:
+    for link in depth_1_links:
+        if len(collected_links) >= 120:
+            break
+        new_links = list(get_links(link))[:120 - len(collected_links)]
+        collected_links.update(new_links)
+        save_links_to_db(new_links)
 
 print(f"Total links collected: {len(collected_links)}")
 
