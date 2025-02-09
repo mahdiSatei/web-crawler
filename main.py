@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
+from collections import deque
 
 load_dotenv()
 
@@ -41,12 +42,16 @@ chrom_options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=chrom_options)
 
 base_url = "https://www.isna.ir/"
+MAX_DEPTH = 2
+
 collected_links = set()
+visited_links = set()
+queue = deque([(base_url, 1)])
 
 # A function to normalize urls
 def normalize(url):
-    parsed_url = urlparse(url)
-    normal_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+    parsed = urlparse(url)
+    normal_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
     return normal_url.rstrip('/')
 
 # A function to get links of page
@@ -57,22 +62,29 @@ def get_links(url):
     for elem in elements:
         link = elem.get_attribute("href")
         if link and urlparse(link).netloc.startswith("www.isna.ir"):
-            links.add(normalize(links))
+            new_link = normalize(link)
+            links.add(normalize(new_link))
     return links
 
-# Get all links of first depth
-depth_1_links = list(get_links(base_url))[:120]
-collected_links.update(depth_1_links)
-save_links_to_db(depth_1_links)
+# BFS algorithem for collecting links
+while queue:
 
-# Get links of second depth
-if len(collected_links) < 120:
-    for link in depth_1_links:
-        if len(collected_links) >= 120:
-            break
-        new_links = list(get_links(link))[:120 - len(collected_links)]
-        collected_links.update(new_links)
-        save_links_to_db(new_links)
+    url, depth = queue.popleft()
+
+    if url in visited_links or depth > MAX_DEPTH:
+        continue
+
+    visited_links.add(url)
+    new_links = get_links(url)
+    new_links -= collected_links
+
+    collected_links.update(new_links)
+    save_links_to_db(new_links)
+
+    print(f"{len(new_links)} links added to db")
+
+    for link in new_links:
+        queue.append((link, depth + 1))
 
 print(f"Total links collected: {len(collected_links)}")
 
