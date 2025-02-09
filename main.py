@@ -43,6 +43,12 @@ driver = webdriver.Chrome(service=service, options=chrom_options)
 base_url = "https://www.isna.ir/"
 collected_links = set()
 
+# A function to normalize urls
+def normalize(url):
+    parsed_url = urlparse(url)
+    normal_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+    return normal_url.rstrip('/')
+
 # A function to get links of page
 def get_links(url):
     links = set()
@@ -50,8 +56,8 @@ def get_links(url):
     elements = driver.find_elements(By.TAG_NAME, "a")
     for elem in elements:
         link = elem.get_attribute("href")
-        if link and urlparse(link).netloc.endswith("isna.ir"):
-            links.add(link)
+        if link and urlparse(link).netloc.startswith("www.isna.ir"):
+            links.add(normalize(links))
     return links
 
 # Get all links of first depth
