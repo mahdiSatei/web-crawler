@@ -1,4 +1,5 @@
 import psycopg2
+from config import DB_CONFIG
 
 # A function to save links into database
 def save_links_to_db(links):
