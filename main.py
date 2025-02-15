@@ -1,25 +1,9 @@
-import psycopg2
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 from collections import deque
-
-# A function to save links into database
-def save_links_to_db(links):
-    try:
-        conn = psycopg2.connect(**DB_CONFIG)
-        cur = conn.cursor()
-        cur.executemany(
-            "INSERT INTO links (url) VALUES (%s) ON CONFLICT (url) DO NOTHING;",
-            [(link,) for link in links],
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        print(f"Error saving links: {e}")
 
 # Setup chrom web driver
 PATH = "./chromedriver"
