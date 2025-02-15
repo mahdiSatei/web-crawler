@@ -1,23 +1,10 @@
 import psycopg2
-import os
-from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 from collections import deque
-
-load_dotenv()
-
-# Postgres config
-DB_CONFIG = {
-    "dbname": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT")
-}
 
 # A function to save links into database
 def save_links_to_db(links):
